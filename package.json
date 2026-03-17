@@ -1,0 +1,11 @@
+{
+  "name": "ontap-dauthu",
+  "version": "1.0.0",
+  "description": "Convert DOCX câu hỏi ôn thi đấu thầu sang JSON",
+  "scripts": {
+    "convert": "node convert.js"
+  },
+  "dependencies": {
+    "adm-zip": "^0.5.16"
+  }
+}

@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ôn tập – Chứng chỉ Nghiệp vụ Đấu thầu</title>
+  <script src="questions_data.js"></script>
+  <style>
+    /* ─── Reset & Base ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:   #1d6fd1;
+      --primary-d: #145bb0;
+      --success:   #198754;
+      --danger:    #dc3545;
+      --warn:      #ffc107;
+      --bg:        #f0f4f8;
+      --card:      #ffffff;
+      --border:    #dee2e6;
+      --text:      #212529;
+      --muted:     #6c757d;
+      --radius:    10px;
+      --shadow:    0 2px 12px rgba(0,0,0,.10);
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ─── Header ────────────────────────────────────────────────── */
+    header {
+      background: linear-gradient(135deg, #1d6fd1 0%, #0d47a1 100%);
+      color: #fff;
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.2);
+    }
+    header .logo { font-size: 28px; }
+    header h1 { font-size: 1.15rem; font-weight: 700; line-height: 1.3; }
+    header .sub { font-size: .8rem; opacity: .85; font-weight: 400; }
+
+    /* ─── Wrapper ───────────────────────────────────────────────── */
+    .container { max-width: 900px; margin: 0 auto; padding: 24px 16px 60px; }
+
+    /* ─── Screen: Home ──────────────────────────────────────────── */
+    #screen-home { }
+    .home-intro {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .home-intro .stat { font-size: 2rem; font-weight: 800; color: var(--primary); }
+    .home-intro p { color: var(--muted); font-size: .9rem; margin-top: 2px; }
+
+    .section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 12px;
+      display: flex; align-items: center; gap: 6px;
+    }
+
+    .set-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+    }
+
+    .set-card {
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      cursor: pointer;
+      transition: all .18s;
+      text-align: center;
+      position: relative;
+    }
+    .set-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(29,111,209,.18);
+    }
+    .set-card .set-num { font-size: 1.4rem; font-weight: 800; color: var(--primary); }
+    .set-card .set-range { font-size: .75rem; color: var(--muted); margin-top: 2px; }
+    .set-card .set-score-badge {
+      position: absolute; top: 8px; right: 8px;
+      background: var(--success); color: #fff;
+      font-size: .65rem; font-weight: 700;
+      padding: 2px 7px; border-radius: 20px;
+      display: none;
+    }
+    .set-card.done .set-score-badge { display: block; }
+
+    /* ─── Screen: Quiz ──────────────────────────────────────────── */
+    #screen-quiz { display: none; }
+
+    .quiz-header {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
+    }
+    .quiz-header-top {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 8px; margin-bottom: 10px;
+    }
+    .quiz-title { font-weight: 700; font-size: 1rem; }
+    .quiz-meta { font-size: .82rem; color: var(--muted); }
+
+    .progress-bar-wrap {
+      background: #e9ecef; border-radius: 20px; height: 8px; overflow: hidden;
+    }
+    .progress-bar-fill {
+      background: linear-gradient(90deg, var(--primary), #42a5f5);
+      height: 100%; border-radius: 20px;
+      transition: width .3s ease;
+    }
+    .progress-text { font-size: .75rem; color: var(--muted); margin-top: 4px; text-align: right; }
+
+    /* Question card */
+    .question-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+      border-left: 4px solid transparent;
+      transition: border-color .2s;
+    }
+    .question-card.answered-correct { border-left-color: var(--success); }
+    .question-card.answered-wrong   { border-left-color: var(--danger); }
+
+    .q-number {
+      font-size: .72rem; font-weight: 700; color: var(--primary);
+      background: #e8f0fe; padding: 2px 10px; border-radius: 20px;
+      display: inline-block; margin-bottom: 10px;
+    }
+    .q-text {
+      font-size: .97rem; font-weight: 600; line-height: 1.6;
+      margin-bottom: 14px;
+    }
+
+    /* Options */
+    .options { display: flex; flex-direction: column; gap: 8px; }
+
+    .option-label {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 10px 14px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all .15s;
+      font-size: .9rem; line-height: 1.5;
+      user-select: none;
+    }
+    .option-label:hover { border-color: var(--primary); background: #f0f7ff; }
+    .option-label input[type="radio"] { display: none; }
+    .option-label.selected { border-color: var(--primary); background: #e8f0fe; }
+
+    /* After checking */
+    .option-label.correct {
+      border-color: var(--success);
+      background: #d1e7dd;
+      color: #0a3622;
+    }
+    .option-label.wrong {
+      border-color: var(--danger);
+      background: #f8d7da;
+      color: #58151c;
+    }
+    .option-label.show-correct {
+      border-color: var(--success);
+      background: #d1e7dd;
+      color: #0a3622;
+    }
+
+    .option-key {
+      font-weight: 700; min-width: 24px; padding-top: 1px;
+    }
+
+    /* Icons */
+    .icon-correct::after { content: " ✓"; font-weight: 800; }
+    .icon-wrong::after   { content: " ✗"; font-weight: 800; }
+
+    /* ─── Result Banner ─────────────────────────────────────────── */
+    #result-banner {
+      display: none;
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      text-align: center;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+    .result-emoji { font-size: 3rem; }
+    .result-title { font-size: 1.4rem; font-weight: 800; margin: 8px 0 4px; }
+    .result-score { font-size: 2.5rem; font-weight: 900; }
+    .result-sub   { color: var(--muted); font-size: .9rem; margin-top: 4px; }
+    .result-bar-wrap {
+      background: #e9ecef; border-radius: 20px; height: 14px;
+      overflow: hidden; margin: 16px 0;
+    }
+    .result-bar-fill {
+      background: linear-gradient(90deg, var(--success), #20c997);
+      height: 100%; border-radius: 20px;
+      transition: width 1s ease;
+    }
+
+    /* ─── Action Buttons ────────────────────────────────────────── */
+    .btn-row {
+      display: flex; flex-wrap: wrap; gap: 10px;
+      justify-content: center; margin-top: 20px;
+    }
+    .btn {
+      padding: 10px 24px; border-radius: 8px; font-size: .9rem;
+      font-weight: 600; border: none; cursor: pointer; transition: all .18s;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-d); }
+    .btn-success { background: var(--success); color: #fff; }
+    .btn-success:hover { background: #146c43; }
+    .btn-outline {
+      background: transparent; color: var(--primary);
+      border: 2px solid var(--primary);
+    }
+    .btn-outline:hover { background: #e8f0fe; }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* sticky check button */
+    .sticky-check {
+      position: sticky; bottom: 16px;
+      display: flex; justify-content: center;
+      pointer-events: none;
+    }
+    .sticky-check .btn { pointer-events: all; box-shadow: 0 4px 16px rgba(0,0,0,.25); }
+
+    /* ─── Toast ─────────────────────────────────────────────────── */
+    #toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(60px);
+      background: #333; color: #fff; padding: 10px 22px;
+      border-radius: 30px; font-size: .88rem;
+      transition: transform .3s ease; z-index: 999;
+      pointer-events: none;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ─── Responsive ─────────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      header h1 { font-size: 1rem; }
+      .set-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+      .question-card { padding: 14px 16px; }
+      .option-label { font-size: .85rem; }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">📋</div>
+  <div>
+    <div class="h1">Ôn tập Nghiệp vụ Đấu thầu</div>
+    <div class="sub">Bộ câu hỏi ôn thi – Chứng chỉ Đấu thầu</div>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- ══════════════════════ HOME ══════════════════════ -->
+  <div id="screen-home">
+    <div class="home-intro">
+      <div>
+        <div class="stat" id="stat-total">0</div>
+        <div>câu hỏi</div>
+      </div>
+      <div style="flex:1">
+        <p>Chọn một <strong>Bộ đề</strong> bên dưới để bắt đầu ôn tập.</p>
+        <p>Mỗi bộ gồm <strong>25 câu</strong> trắc nghiệm có đáp án đúng/sai sau khi kiểm tra.</p>
+      </div>
+    </div>
+
+    <div class="section-title">📚 Chọn bộ đề</div>
+    <div class="set-grid" id="set-grid"></div>
+  </div>
+
+  <!-- ══════════════════════ QUIZ ══════════════════════ -->
+  <div id="screen-quiz">
+
+    <!-- Header bộ đề -->
+    <div class="quiz-header">
+      <div class="quiz-header-top">
+        <span class="quiz-title" id="quiz-title">Bộ đề 1</span>
+        <span class="quiz-meta" id="quiz-meta"></span>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+      <div class="progress-text" id="progress-text">Chưa trả lời câu nào</div>
+    </div>
+
+    <!-- Kết quả -->
+    <div id="result-banner">
+      <div class="result-emoji" id="result-emoji">🎉</div>
+      <div class="result-title" id="result-title">Kết quả</div>
+      <div class="result-score" id="result-score">0/25</div>
+      <div class="result-sub" id="result-sub"></div>
+      <div class="result-bar-wrap">
+        <div class="result-bar-fill" id="result-bar" style="width:0%"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-outline" onclick="retrySet()">🔁 Làm lại</button>
+        <button class="btn btn-primary" onclick="goHome()">🏠 Bộ khác</button>
+      </div>
+    </div>
+
+    <!-- Danh sách câu hỏi -->
+    <div id="question-list"></div>
+
+    <!-- Nút kiểm tra (sticky) -->
+    <div class="sticky-check">
+      <button class="btn btn-success" id="btn-check" onclick="checkAnswers()">
+        ✅ Kiểm tra kết quả
+      </button>
+    </div>
+
+    <div class="btn-row" style="margin-top:10px">
+      <button class="btn btn-outline" onclick="goHome()">← Quay lại</button>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+// ─── State ────────────────────────────────────────────────────────────────────
+const QUESTIONS = typeof QUESTIONS_DATA !== 'undefined' ? QUESTIONS_DATA : [];
+const SET_SIZE = 25;
+let currentSetIndex = 0;    // 0-based
+let currentSetQuestions = [];
+let userAnswers = [];        // -1 = chưa trả lời
+let checked = false;
+let scores = {};             // setIndex → score string
+
+// ─── Bootstrap ───────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  if (QUESTIONS.length === 0) {
+    document.getElementById('screen-home').innerHTML =
+      `<div style="text-align:center;padding:60px 20px;color:#dc3545">
+        <div style="font-size:3rem">⚠️</div>
+        <h2>Không tìm thấy dữ liệu câu hỏi</h2>
+        <p style="margin-top:12px;color:#6c757d">
+          Vui lòng chạy <code>node convert.js</code> để tạo file
+          <code>questions_data.js</code> trước khi mở trang này.
+        </p>
+      </div>`;
+    return;
+  }
+  document.getElementById('stat-total').textContent = QUESTIONS.length;
+  buildSetGrid();
+});
+
+// ─── Home screen ─────────────────────────────────────────────────────────────
+function buildSetGrid() {
+  const grid = document.getElementById('set-grid');
+  grid.innerHTML = '';
+  const numSets = Math.ceil(QUESTIONS.length / SET_SIZE);
+
+  for (let i = 0; i < numSets; i++) {
+    const from = i * SET_SIZE + 1;
+    const to   = Math.min((i + 1) * SET_SIZE, QUESTIONS.length);
+    const card = document.createElement('div');
+    card.className = 'set-card' + (scores[i] ? ' done' : '');
+    card.innerHTML = `
+      <div class="set-num">Bộ ${i + 1}</div>
+      <div class="set-range">Câu ${from}–${to}</div>
+      <div class="set-score-badge" id="badge-${i}">${scores[i] || ''}</div>
+    `;
+    card.onclick = () => startSet(i);
+    grid.appendChild(card);
+  }
+}
+
+// ─── Start a set ─────────────────────────────────────────────────────────────
+function startSet(setIdx) {
+  currentSetIndex = setIdx;
+  const from = setIdx * SET_SIZE;
+  const to   = Math.min(from + SET_SIZE, QUESTIONS.length);
+  currentSetQuestions = QUESTIONS.slice(from, to);
+  userAnswers = Array(currentSetQuestions.length).fill(-1);
+  checked = false;
+
+  document.getElementById('screen-home').style.display = 'none';
+  document.getElementById('screen-quiz').style.display = 'block';
+  document.getElementById('result-banner').style.display = 'none';
+  document.getElementById('btn-check').style.display = 'flex';
+  document.getElementById('btn-check').disabled = false;
+  document.getElementById('btn-check').textContent = '✅ Kiểm tra kết quả';
+
+  document.getElementById('quiz-title').textContent =
+    `Bộ đề ${setIdx + 1}`;
+  document.getElementById('quiz-meta').textContent =
+    `Câu ${from + 1}–${to} / ${QUESTIONS.length}`;
+
+  renderQuestions();
+  updateProgress();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ─── Render questions ─────────────────────────────────────────────────────────
+function renderQuestions() {
+  const list = document.getElementById('question-list');
+  list.innerHTML = '';
+
+  currentSetQuestions.forEach((q, qi) => {
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.id = `qcard-${qi}`;
+
+    const optHtml = q.options.map((opt, oi) => `
+      <label class="option-label" id="opt-${qi}-${oi}" onclick="selectOption(${qi}, ${oi})">
+        <input type="radio" name="q${qi}" value="${oi}" />
+        <span class="option-key">${'ABCD'[oi]}.</span>
+        <span>${escHtml(opt)}</span>
+      </label>
+    `).join('');
+
+    const globalNum = currentSetIndex * SET_SIZE + qi + 1;
+    card.innerHTML = `
+      <div class="q-number">Câu ${globalNum}</div>
+      <div class="q-text">${escHtml(q.question)}</div>
+      <div class="options" id="opts-${qi}">${optHtml}</div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+// ─── Select option ────────────────────────────────────────────────────────────
+function selectOption(qi, oi) {
+  if (checked) return;
+  userAnswers[qi] = oi;
+
+  // Visual feedback
+  for (let k = 0; k < 4; k++) {
+    const el = document.getElementById(`opt-${qi}-${k}`);
+    if (el) el.classList.toggle('selected', k === oi);
+  }
+  updateProgress();
+}
+
+// ─── Progress ────────────────────────────────────────────────────────────────
+function updateProgress() {
+  const answered = userAnswers.filter(a => a >= 0).length;
+  const total = currentSetQuestions.length;
+  const pct = Math.round((answered / total) * 100);
+
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-text').textContent =
+    answered === 0 ? 'Chưa trả lời câu nào'
+    : answered === total ? '✔ Đã trả lời đủ – Nhấn Kiểm tra!'
+    : `Đã trả lời ${answered}/${total} câu`;
+
+  // Enable/disable check button hint
+  const btn = document.getElementById('btn-check');
+  if (btn && !checked) btn.disabled = false;
+}
+
+// ─── Check answers ────────────────────────────────────────────────────────────
+function checkAnswers() {
+  const unanswered = userAnswers.filter(a => a < 0).length;
+  if (unanswered > 0) {
+    showToast(`⚠️ Còn ${unanswered} câu chưa trả lời!`);
+    return;
+  }
+
+  checked = true;
+  document.getElementById('btn-check').style.display = 'none';
+
+  let correct = 0;
+  currentSetQuestions.forEach((q, qi) => {
+    const userAns  = userAnswers[qi];
+    const rightAns = q.answer;
+    const card     = document.getElementById(`qcard-${qi}`);
+    const isRight  = (userAns === rightAns);
+
+    if (isRight) {
+      correct++;
+      card.classList.add('answered-correct');
+    } else {
+      card.classList.add('answered-wrong');
+    }
+
+    // Color options
+    for (let oi = 0; oi < 4; oi++) {
+      const label = document.getElementById(`opt-${qi}-${oi}`);
+      if (!label) continue;
+      label.classList.remove('selected');
+      if (oi === rightAns) {
+        label.classList.add(isRight ? 'correct' : 'show-correct');
+        label.querySelector('span:last-child').insertAdjacentHTML(
+          'beforeend', `<span class="icon-correct" style="color:var(--success)"></span>`
+        );
+      } else if (oi === userAns && !isRight) {
+        label.classList.add('wrong');
+        label.querySelector('span:last-child').insertAdjacentHTML(
+          'beforeend', `<span class="icon-wrong" style="color:var(--danger)"></span>`
+        );
+      }
+    }
+  });
+
+  const total = currentSetQuestions.length;
+  const pct   = Math.round((correct / total) * 100);
+  const scoreStr = `${correct}/${total}`;
+  scores[currentSetIndex] = scoreStr;
+
+  // Update set card badge
+  const badge = document.getElementById(`badge-${currentSetIndex}`);
+  if (badge) { badge.style.display = 'block'; badge.textContent = scoreStr; }
+
+  // Show result banner
+  const banner = document.getElementById('result-banner');
+  banner.style.display = 'block';
+  document.getElementById('result-emoji').textContent =
+    pct >= 80 ? '🎉' : pct >= 60 ? '👍' : '📖';
+  document.getElementById('result-title').textContent =
+    pct >= 80 ? 'Xuất sắc!' : pct >= 60 ? 'Khá tốt!' : 'Cần ôn thêm!';
+  document.getElementById('result-score').textContent = scoreStr;
+  document.getElementById('result-sub').textContent =
+    `Tỉ lệ đúng: ${pct}% – ${correct >= total ? 'Hoàn hảo! 🏆' : `Sai ${total - correct} câu`}`;
+
+  // Animate bar
+  setTimeout(() => {
+    document.getElementById('result-bar').style.width = pct + '%';
+  }, 100);
+
+  banner.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ─── Retry current set ────────────────────────────────────────────────────────
+function retrySet() {
+  startSet(currentSetIndex);
+}
+
+// ─── Go home ─────────────────────────────────────────────────────────────────
+function goHome() {
+  document.getElementById('screen-quiz').style.display = 'none';
+  document.getElementById('screen-home').style.display = 'block';
+  buildSetGrid(); // refresh badges
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ─── Toast ────────────────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ─── Escape HTML ─────────────────────────────────────────────────────────────
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+</script>
+
+</body>
+</html>
